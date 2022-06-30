@@ -1,15 +1,13 @@
 package com.elibrary.crudauth.usecase;
 
-import com.elibrary.crudauth.dao.BookModel;
+import com.elibrary.crudauth.dto.response.DataResponse;
+import com.elibrary.crudauth.entity.BookModel;
 import com.elibrary.crudauth.repo.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -19,69 +17,63 @@ public class BookUseCaseImpl implements BookUseCase {
     @Autowired
     BookRepository bookRepository;
 
-
     @Override
-    public ResponseEntity<BookModel> findBookById(long bookId) {
-        Optional<BookModel> bookModel = bookRepository.findById(bookId);
-        if (bookModel.isPresent()) {
-            return new ResponseEntity<>(bookModel.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public DataResponse getAllBooks() {
+        List<BookModel> bookModels = bookRepository.findAll();
+        if (bookModels.isEmpty()) {
+            return DataResponse.builder()
+                    .status(false)
+                    .message("No Data")
+                    .data(null)
+                    .build();
         }
+        return DataResponse.builder()
+                .status(true)
+                .message("Success")
+                .data(bookModels)
+                .build();
     }
 
     @Override
-    public ResponseEntity<BookModel> addBookrecord(BookModel bookModel) {
-        try {
-            BookModel model = bookRepository
-                    .save(bookModel);
-            return new ResponseEntity<>(model, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    public DataResponse getBookById(Long bookId) {
+        Optional<BookModel> optBookModel = bookRepository.findById(bookId);
+        if (optBookModel.isEmpty()) {
+            return DataResponse.builder()
+                    .status(false)
+                    .message("Data Not Found")
+                    .data(null)
+                    .build();
         }
+        return DataResponse.builder()
+                .status(true)
+                .message("Success")
+                .data(optBookModel)
+                .build();
     }
 
     @Override
-    public List<BookModel> getAllBooks() {
-
-        return bookRepository.findAll();
-    }
-
-    @Override
-    public BookModel updateBook(BookModel bookModel, long bookId) {
-        BookModel model
-                = bookRepository.findById(bookId)
-                .get();
-
-        if (Objects.nonNull(bookModel.getBookName())
-                && !"".equalsIgnoreCase(
-                bookModel.getBookName())) {
-            model.setBookName(
-                    bookModel.getBookName());
+    public DataResponse updateBook(BookModel bookModel, Long bookId) {
+        if (bookId != null) {
+            Optional<BookModel> updBookModel = bookRepository.findById(bookId);
+            if (updBookModel.isPresent()) {
+                BookModel getBookModel = updBookModel.get();
+                getBookModel.setBookName(bookModel.getBookName());
+                getBookModel.setBookAuthor(bookModel.getBookAuthor());
+                getBookModel.setBookPublisher(bookModel.getBookPublisher());
+                getBookModel.setBookIsbn(bookModel.getBookIsbn());
+                BookModel book = bookRepository.save(getBookModel);
+                return DataResponse.builder()
+                        .status(true)
+                        .message("Success")
+                        .data(book)
+                        .build();
+            }
         }
-
-        if (Objects.nonNull(
-                bookModel.getBookIsbn())
-                && !"".equalsIgnoreCase(
-                String.valueOf(bookModel.getBookIsbn()))) {
-            model.setBookIsbn(
-                    bookModel.getBookIsbn());
-        }
-
-        if (Objects.nonNull(bookModel.getBookAuthor())
-                && !"".equalsIgnoreCase(
-                bookModel.getBookAuthor())) {
-            model.setBookAuthor(
-                    bookModel.getBookAuthor());
-        }
-
-        if (Objects.nonNull(bookModel.getBookPublisher())
-                && !"".equalsIgnoreCase(
-                bookModel.getBookPublisher())) {
-            model.setBookPublisher(
-                    bookModel.getBookPublisher());
-        }
-
-        return bookRepository.save(model);
+        BookModel book = bookRepository.save(bookModel);
+        return DataResponse.builder()
+                .status(true)
+                .message("Success")
+                .data(book)
+                .build();
     }
 }

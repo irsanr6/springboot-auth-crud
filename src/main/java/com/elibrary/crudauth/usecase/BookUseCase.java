@@ -1,18 +1,14 @@
 package com.elibrary.crudauth.usecase;
 
-import com.elibrary.crudauth.dao.BookModel;
-import org.springframework.http.ResponseEntity;
-
-import java.util.List;
+import com.elibrary.crudauth.dto.response.DataResponse;
+import com.elibrary.crudauth.entity.BookModel;
 
 
 public interface BookUseCase {
 
-    ResponseEntity<BookModel> findBookById(long bookId);
+    DataResponse getAllBooks();
+    
+    DataResponse getBookById(Long bookId);
 
-    ResponseEntity<BookModel> addBookrecord(BookModel bookModel);
-
-    List<BookModel> getAllBooks();
-
-    BookModel updateBook(BookModel bookModel, long bookId);
+    DataResponse updateBook(BookModel bookModel, Long bookId);
 }

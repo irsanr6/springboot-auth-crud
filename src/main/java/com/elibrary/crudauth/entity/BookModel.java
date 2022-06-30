@@ -1,4 +1,4 @@
-package com.elibrary.crudauth.dao;
+package com.elibrary.crudauth.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,12 +1,14 @@
 package com.elibrary.crudauth.presenter;
 
-import com.elibrary.crudauth.dao.BookModel;
+import com.elibrary.crudauth.entity.BookModel;
+import com.elibrary.crudauth.dto.response.DataResponse;
 import com.elibrary.crudauth.usecase.BookUseCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -21,22 +23,19 @@ public class BookPresenter {
     }
 
     @GetMapping("/books")
-    public List<BookModel> getAllBook() {
-        return bookUseCase.getAllBooks();
-    }
-
-    @GetMapping("/books/{book_id}")
-    public ResponseEntity<BookModel> getBookById(@PathVariable("book_id") long bookId) {
-        return bookUseCase.findBookById(bookId);
+    public ResponseEntity<?> getAllBook( @RequestParam(required = false, value = "book_id") Long bookId) {
+        if (bookId == null) {
+            DataResponse bookModels = bookUseCase.getAllBooks();
+            return ResponseEntity.ok().body(bookModels);
+        } else {
+            DataResponse bookModel = bookUseCase.getBookById(bookId);
+            return ResponseEntity.ok().body(bookModel);
+        }
     }
 
     @PostMapping("/books")
-    public ResponseEntity<BookModel> addBook(@RequestBody BookModel bookModel) {
-        return bookUseCase.addBookrecord(bookModel);
-    }
-
-    @PutMapping("books/{book_id}")
-    public BookModel updateBook(@RequestBody BookModel bookModel, @PathVariable("book_id") long bookId) {
-        return bookUseCase.updateBook(bookModel, bookId);
+    public ResponseEntity<?> updateBook(@RequestBody BookModel bookModel, @RequestParam(required = false, value = "book_id") Long bookId) {
+        DataResponse updBookModel = bookUseCase.updateBook(bookModel, bookId);
+        return ResponseEntity.ok().body(updBookModel);
     }
 }
